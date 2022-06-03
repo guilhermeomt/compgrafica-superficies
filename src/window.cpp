@@ -78,12 +78,14 @@ void Window::showControlPoints() {
   {
     glBegin(GL_POINTS);
     for (j = 0; j < _pControl[0]->cols(); j++)
-      glVertex3fv(Matrix::to_array(*_pControl[i]));
+    {
+      glVertex3fv(*_pControl[X]->get(i, j));
+    }
     glEnd();
 
     glBegin(GL_LINE_STRIP);
     for (j = 0; j < _pControl[0]->cols(); j++)
-      glVertex3fv(Matrix::to_array(*_pControl[i]));
+      glVertex3fv(*_pControl[X]->get(i, j));
     glEnd();
   }
 
@@ -91,8 +93,54 @@ void Window::showControlPoints() {
   {
     glBegin(GL_LINE_STRIP);
     for (j = 0; j < _pControl[0]->rows(); j++)
-      glVertex3fv(Matrix::to_array(*_pControl[i]));
+      glVertex3fv(*_pControl[X]->get(j, i));
     glEnd();
+  }
+}
+
+int Window::LoadPoints(char* fileName)
+{
+  FILE* fobj;
+  char token[40];
+  float px, py, pz;
+  int i, j, n, m;
+  float local_scale = 0.22f;
+
+  printf(" \n ler  %s  \n", fileName);
+
+  if ((fobj = fopen(fileName, "rt")) == NULL)
+  {
+    printf("Error en la apertura del archivo %s \n", fileName);
+    return 0;
+  }
+
+  fgets(token, 40, fobj);
+  fscanf(fobj, "%s %d %d", token, &n, &m);
+
+  _pControl = new Matrix<f4d> *[n];
+
+  for (i = 0; i < n; i++)
+  {
+    _pControl[i] = new Matrix<f4d>(n, m);
+  }
+
+  fscanf(fobj, "%s", token);  // leitura da linha 0
+
+  for (i = 0; i < n; i++)
+  {
+    for (j = 0; j < m; j++)
+    {
+      fscanf(fobj, "%s %f %f %f", token, &px, &py, &pz);
+
+      auto p = new float[4]{ px * local_scale, py * local_scale, pz * local_scale, 1.0f };
+
+      _pControl[0]->set(i, j, &p[0]);
+      _pControl[1]->set(i, j, &p[1]);
+      _pControl[2]->set(i, j, &p[2]);
+      _pControl[3]->set(i, j, &p[3]);
+
+    }
+    fscanf(fobj, "%s", token);  // leitura da linha j+1;
   }
 }
 
@@ -130,57 +178,6 @@ void Window::mouse(int button, int state, int x, int y)
 
 }
 
-int Window::LoadPoints(char* fileName)
-{
-  FILE* fobj;
-  char token[40];
-  float px, py, pz;
-  int i, j, n, m;
-  float local_scale = 0.22f;
-
-  printf(" \n ler  %s  \n", fileName);
-
-  if ((fobj = fopen(fileName, "rt")) == NULL)
-  {
-    printf("Error en la apertura del archivo %s \n", fileName);
-    return 0;
-  }
-
-  fgets(token, 40, fobj);
-  fscanf(fobj, "%s %d %d", token, &n, &m);
-
-  // if (pControle) pControle = liberaMatriz(pControle);
-
-  _pControl = new Matrix * [n];
-
-  for (i = 0; i < n; i++)
-  {
-    _pControl[i] = new Matrix(n, m);
-  }
-
-  fscanf(fobj, "%s", token);  // leitura da linha 0
-
-  for (i = 0; i < n; i++)
-  {
-    for (j = 0; j < m; j++)
-    {
-      fscanf(fobj, "%s %f %f %f", token, &px, &py, &pz);
-
-      _pControl[0]->set(i, j, px * local_scale);
-      _pControl[1]->set(i, j, py * local_scale);
-      _pControl[2]->set(i, j, pz * local_scale);
-      _pControl[3]->set(i, j, 1.0);
-      printf("%f %f %f \n", _pControl[0]->get(i, j), _pControl[1]->get(i, j), _pControl[2]->get(i, j));
-    }
-    printf("\n");
-    fscanf(fobj, "%s", token);  // leitura da linha j+1;
-  }
-
-  // // espaco de matriz para um patch
-  // if (pcPatch) pcPatch = liberaMatriz(pcPatch);
-  // pcPatch = AlocaMatriz(4, 4);
-}
-
 void Window::handleMenuEvents(int option)
 {
   if (option == PtsControle)
@@ -199,7 +196,7 @@ void Window::handleMenuEvents(int option)
  // {
  //   MontaMatrizBase(option);
  // }
- // glutPostRedisplay();
+  glutPostRedisplay();
 }
 
 void Window::handleColorEvents(int option) {

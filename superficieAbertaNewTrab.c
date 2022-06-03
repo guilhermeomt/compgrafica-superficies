@@ -303,7 +303,7 @@ void MostrarUmPatch(int cc)
 {
   int i, j;
   float t, v, s;
-  f4d a, b, n, l;
+  f4d a, b, n, l, cx, cy, c;
 
   if (!ptsPatch)  return;
 
@@ -347,20 +347,18 @@ void MostrarUmPatch(int cc)
       for (j = 0; j < ptsPatch->m - 1; j++)
       {
 
-        // -----------------------------------------------------
-        // OBSERVACAO 2: modificar
-        //  Ver a melhor forma de criar triangulos 1ro e 2do
-          // -----------------------------------------------------
-
-                // criando 1ro triangulo do quadrilatero
-
+        // criando 1o triangulo
         a[X] = ptsPatch->ponto[i + 1][j][X] - ptsPatch->ponto[i][j][X];
         a[Y] = ptsPatch->ponto[i + 1][j][Y] - ptsPatch->ponto[i][j][Y];
         a[Z] = ptsPatch->ponto[i + 1][j][Z] - ptsPatch->ponto[i][j][Z];
 
-        b[X] = ptsPatch->ponto[i][j + 1][X] - ptsPatch->ponto[i][j][X];
-        b[Y] = ptsPatch->ponto[i][j + 1][Y] - ptsPatch->ponto[i][j][Y];
-        b[Z] = ptsPatch->ponto[i][j + 1][Z] - ptsPatch->ponto[i][j][Z];
+        b[X] = ptsPatch->ponto[i + 1][j + 1][X] - ptsPatch->ponto[i][j][X];
+        b[Y] = ptsPatch->ponto[i + 1][j + 1][Y] - ptsPatch->ponto[i][j][Y];
+        b[Z] = ptsPatch->ponto[i + 1][j + 1][Z] - ptsPatch->ponto[i][j][Z];
+
+        c[X] = (ptsPatch->ponto[i + 1][j + 1][X] - ptsPatch->ponto[i][j][X]) / 2 + ptsPatch->ponto[i][j][X];
+        c[Y] = (ptsPatch->ponto[i + 1][j + 1][Y] - ptsPatch->ponto[i][j][Y]) / 2 + ptsPatch->ponto[i][j][Y];
+        c[Z] = (ptsPatch->ponto[i + 1][j + 1][Z] - ptsPatch->ponto[i][j][Z]) / 2 + ptsPatch->ponto[i][j][Z];
 
         n[X] = a[Y] * b[Z] - a[Z] * b[Y];
         n[Y] = a[Z] * b[X] - a[X] * b[Z];
@@ -386,20 +384,104 @@ void MostrarUmPatch(int cc)
         glColor3f(t * vcolor[cc][X], t * vcolor[cc][Y], t * vcolor[cc][Z]);
         glNormal3fv(n);
         glVertex3fv(ptsPatch->ponto[i][j]);
+        glVertex3fv(c);
         glVertex3fv(ptsPatch->ponto[i][j + 1]);
+        glEnd();
+
+        // criando 2o triangulo
+        a[X] = ptsPatch->ponto[i + 1][j][X] - ptsPatch->ponto[i][j][X];
+        a[Y] = ptsPatch->ponto[i + 1][j][Y] - ptsPatch->ponto[i][j][Y];
+        a[Z] = ptsPatch->ponto[i + 1][j][Z] - ptsPatch->ponto[i][j][Z];
+
+        b[X] = ptsPatch->ponto[i + 1][j + 1][X] - ptsPatch->ponto[i][j][X];
+        b[Y] = ptsPatch->ponto[i + 1][j + 1][Y] - ptsPatch->ponto[i][j][Y];
+        b[Z] = ptsPatch->ponto[i + 1][j + 1][Z] - ptsPatch->ponto[i][j][Z];
+
+        c[X] = (ptsPatch->ponto[i + 1][j + 1][X] - ptsPatch->ponto[i][j][X]) / 2 + ptsPatch->ponto[i][j][X];
+        c[Y] = (ptsPatch->ponto[i + 1][j + 1][Y] - ptsPatch->ponto[i][j][Y]) / 2 + ptsPatch->ponto[i][j][Y];
+        c[Z] = (ptsPatch->ponto[i + 1][j + 1][Z] - ptsPatch->ponto[i][j][Z]) / 2 + ptsPatch->ponto[i][j][Z];
+
+        n[X] = a[Y] * b[Z] - a[Z] * b[Y];
+        n[Y] = a[Z] * b[X] - a[X] * b[Z];
+        n[Z] = a[X] * b[Y] - a[Y] * b[X];
+
+        s = sqrt(n[X] * n[X] + n[Y] * n[Y] + n[Z] * n[Z]);
+
+        n[X] /= s; n[Y] /= s; n[Z] /= s;
+
+        l[X] = pView[X] - ptsPatch->ponto[i + 1][j][X];
+        l[Y] = pView[Y] - ptsPatch->ponto[i + 1][j][Y];
+        l[Z] = pView[Z] - ptsPatch->ponto[i + 1][j][Z];
+
+        s = n[X] * l[X] + n[Y] * l[Y] + n[Z] * l[Z];
+
+        v = sqrt(l[X] * l[X] + l[Y] * l[Y] + l[Z] * l[Z]);
+        t = s / v;
+
+        if (t < 0.0f)
+          t *= -1.00f;
+
+        glBegin(GL_POLYGON);
+        glColor3f(t * vcolor[cc][X], t * vcolor[cc][Y], t * vcolor[cc][Z]);
+        glNormal3fv(n);
+        glVertex3fv(ptsPatch->ponto[i][j]);
+        glVertex3fv(c);
         glVertex3fv(ptsPatch->ponto[i + 1][j]);
         glEnd();
 
-        // criando 2do triangulo
+        // criando 3o triangulo
+        a[X] = ptsPatch->ponto[i + 1][j][X] - ptsPatch->ponto[i][j][X];
+        a[Y] = ptsPatch->ponto[i + 1][j][Y] - ptsPatch->ponto[i][j][Y];
+        a[Z] = ptsPatch->ponto[i + 1][j][Z] - ptsPatch->ponto[i][j][Z];
 
+        b[X] = ptsPatch->ponto[i + 1][j + 1][X] - ptsPatch->ponto[i][j][X];
+        b[Y] = ptsPatch->ponto[i + 1][j + 1][Y] - ptsPatch->ponto[i][j][Y];
+        b[Z] = ptsPatch->ponto[i + 1][j + 1][Z] - ptsPatch->ponto[i][j][Z];
 
-        a[X] = ptsPatch->ponto[i][j + 1][X] - ptsPatch->ponto[i + 1][j + 1][X];
-        a[Y] = ptsPatch->ponto[i][j + 1][Y] - ptsPatch->ponto[i + 1][j + 1][Y];
-        a[Z] = ptsPatch->ponto[i][j + 1][Z] - ptsPatch->ponto[i + 1][j + 1][Z];
+        c[X] = (ptsPatch->ponto[i + 1][j + 1][X] - ptsPatch->ponto[i][j][X]) / 2 + ptsPatch->ponto[i][j][X];
+        c[Y] = (ptsPatch->ponto[i + 1][j + 1][Y] - ptsPatch->ponto[i][j][Y]) / 2 + ptsPatch->ponto[i][j][Y];
+        c[Z] = (ptsPatch->ponto[i + 1][j + 1][Z] - ptsPatch->ponto[i][j][Z]) / 2 + ptsPatch->ponto[i][j][Z];
 
-        b[X] = ptsPatch->ponto[i + 1][j][X] - ptsPatch->ponto[i + 1][j + 1][X];
-        b[Y] = ptsPatch->ponto[i + 1][j][Y] - ptsPatch->ponto[i + 1][j + 1][Y];
-        b[Z] = ptsPatch->ponto[i + 1][j][Z] - ptsPatch->ponto[i + 1][j + 1][Z];
+        n[X] = a[Y] * b[Z] - a[Z] * b[Y];
+        n[Y] = a[Z] * b[X] - a[X] * b[Z];
+        n[Z] = a[X] * b[Y] - a[Y] * b[X];
+
+        s = sqrt(n[X] * n[X] + n[Y] * n[Y] + n[Z] * n[Z]);
+
+        n[X] /= s; n[Y] /= s; n[Z] /= s;
+
+        l[X] = pView[X] - ptsPatch->ponto[i][j + 1][X];
+        l[Y] = pView[Y] - ptsPatch->ponto[i][j + 1][Y];
+        l[Z] = pView[Z] - ptsPatch->ponto[i][j + 1][Z];
+
+        s = n[X] * l[X] + n[Y] * l[Y] + n[Z] * l[Z];
+
+        v = sqrt(l[X] * l[X] + l[Y] * l[Y] + l[Z] * l[Z]);
+        t = s / v;
+
+        if (t < 0.0f)
+          t *= -1.00f;
+
+        glBegin(GL_POLYGON);
+        glColor3f(t * vcolor[cc][X], t * vcolor[cc][Y], t * vcolor[cc][Z]);
+        glNormal3fv(n);
+        glVertex3fv(ptsPatch->ponto[i + 1][j]);
+        glVertex3fv(c);
+        glVertex3fv(ptsPatch->ponto[i + 1][j + 1]);
+        glEnd();
+
+        // criando 4o triangulo
+        a[X] = ptsPatch->ponto[i + 1][j][X] - ptsPatch->ponto[i][j][X];
+        a[Y] = ptsPatch->ponto[i + 1][j][Y] - ptsPatch->ponto[i][j][Y];
+        a[Z] = ptsPatch->ponto[i + 1][j][Z] - ptsPatch->ponto[i][j][Z];
+
+        b[X] = ptsPatch->ponto[i + 1][j + 1][X] - ptsPatch->ponto[i][j][X];
+        b[Y] = ptsPatch->ponto[i + 1][j + 1][Y] - ptsPatch->ponto[i][j][Y];
+        b[Z] = ptsPatch->ponto[i + 1][j + 1][Z] - ptsPatch->ponto[i][j][Z];
+
+        c[X] = (ptsPatch->ponto[i + 1][j + 1][X] - ptsPatch->ponto[i][j][X]) / 2 + ptsPatch->ponto[i][j][X];
+        c[Y] = (ptsPatch->ponto[i + 1][j + 1][Y] - ptsPatch->ponto[i][j][Y]) / 2 + ptsPatch->ponto[i][j][Y];
+        c[Z] = (ptsPatch->ponto[i + 1][j + 1][Z] - ptsPatch->ponto[i][j][Z]) / 2 + ptsPatch->ponto[i][j][Z];
 
         n[X] = a[Y] * b[Z] - a[Z] * b[Y];
         n[Y] = a[Z] * b[X] - a[X] * b[Z];
@@ -425,8 +507,8 @@ void MostrarUmPatch(int cc)
         glColor3f(t * vcolor[cc][X], t * vcolor[cc][Y], t * vcolor[cc][Z]);
         glNormal3fv(n);
         glVertex3fv(ptsPatch->ponto[i][j + 1]);
+        glVertex3fv(c);
         glVertex3fv(ptsPatch->ponto[i + 1][j + 1]);
-        glVertex3fv(ptsPatch->ponto[i + 1][j]);
         glEnd();
       }
     }
@@ -442,11 +524,14 @@ void MostrarPtosPoligControle(matriz* sup)
   glColor3f(0.0f, 0.8f, 0.0f);
   glPolygonMode(GL_FRONT_AND_BACK, tipoView);
   glPointSize(7.0);
+  printf("%d", sup->n);
   for (i = 0; i < sup->n; i++)
   {
     glBegin(GL_POINTS);
     for (j = 0; j < sup->m; j++)
+    {
       glVertex3fv(sup->ponto[i][j]);
+    }
     glEnd();
 
     glBegin(GL_LINE_STRIP);
@@ -546,8 +631,6 @@ int clipVertex(int x, int y)
   double d;
   gIndVert = -1;
   // para cada vértice do ponto de controle
-  printf("X e Y: %d %d\n", x, y);
-  printf("X e Y (scale): %f %f\n", x * local_scale, y * local_scale);
 
   for (i = 0; i < pControle->n; i++)
   {
@@ -561,12 +644,7 @@ int clipVertex(int x, int y)
       float dy = pontoY - y;
       dy *= local_scale;
       d = sqrt(pow((pontoX - dx), 2.0) + pow((pontoY - dy), 2.0));
-      if (i == 0 && j == 0) {
-        printf("Ponto: (%f,%f)\n", pontoX, pontoY);
-        printf("Ponto D: (%f,%f)\n", dx, dy);
-        printf("Distancia: %f\n", d);
-        printf("\n");
-      }
+
       // distancia do ponto (x, y) a cada vértice do poligono
       // se a distancia d é bem proxima ( d < 3 pixel)
 
@@ -743,9 +821,8 @@ int CarregaPontos(char* arch)
       pControle->ponto[j][i][1] = py * local_scale;
       pControle->ponto[j][i][2] = pz * local_scale;
       pControle->ponto[j][i][3] = 1.0f;
-      printf("%f %f %f \n", pControle->ponto[j][i][0], pControle->ponto[j][i][1], pControle->ponto[j][i][2]);
+
     }
-    printf("\n");
     fscanf(fobj, "%s", token);  // leitura da linha j+1;
   }
 

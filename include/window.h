@@ -42,6 +42,7 @@
 
 #define sair 0
 
+typedef float* f4d;
 
 class Window {
 private:
@@ -53,7 +54,7 @@ private:
   GLenum _doubleBuffer;
   int _gOperation;
   int _idColor;
-  Matrix** _pControl;
+  Matrix<f4d>** _pControl = nullptr;
 
   int _viewType = GL_LINE_STRIP;
 

@@ -82,6 +82,11 @@ f4d vcolor[5] = { {1.0, 0.0, 0.0, 0.0},
 int windW, windH;
 int gIndVert = -1;
 
+int xinicial;
+int yinicial;
+int xf;
+int yf;
+
 matriz* pControle = NULL;  // matriz de pontos de controle  LIDOS
 
 matriz* pcPatch = NULL;    // matriz de pontos para um patch 
@@ -524,7 +529,6 @@ void MostrarPtosPoligControle(matriz* sup)
   glColor3f(0.0f, 0.8f, 0.0f);
   glPolygonMode(GL_FRONT_AND_BACK, tipoView);
   glPointSize(7.0);
-  printf("%d", sup->n);
   for (i = 0; i < sup->n; i++)
   {
     glBegin(GL_POINTS);
@@ -631,7 +635,7 @@ int clipVertex(int x, int y)
   double d;
   gIndVert = -1;
   // para cada vértice do ponto de controle
-
+  printf("----- clipVertex -----\n");
   for (i = 0; i < pControle->n; i++)
   {
     for (j = 0; j < pControle->m; j++)
@@ -645,6 +649,7 @@ int clipVertex(int x, int y)
       dy *= local_scale;
       d = sqrt(pow((pontoX - dx), 2.0) + pow((pontoY - dy), 2.0));
 
+      printf("%f %f %f\n", dx, dy, d);
       // distancia do ponto (x, y) a cada vértice do poligono
       // se a distancia d é bem proxima ( d < 3 pixel)
 
@@ -658,21 +663,199 @@ int clipVertex(int x, int y)
   return gIndVert;
 }
 
-// void motion(int button, int state, int x, int y)
-// {
-//   if (state == GLUT_DOWN)       //  botão SOLTO
-//   {
-//     if (button == GLUT_LEFT_BUTTON)
-//     {
-//       x = x - windW;
-//       // x *= local_scale;
-//       y = windH - y;
-//       // y *= local_scale;
-//       // clipingVertex
-//       gIndVert = clipVertex(x, y);    // verificar e identificar um vértice selecionado
-//     }
-//   }
-// }
+void scale(int key) {
+  if (key == GLUT_KEY_LEFT || key == GLUT_KEY_DOWN) {
+    matTransf[0][0] = 0.99;
+    matTransf[1][1] = 0.99;
+    matTransf[2][2] = 0.99;
+  }
+  else
+    if (key == GLUT_KEY_RIGHT || key == GLUT_KEY_UP) {
+      matTransf[0][0] = 1.01;
+      matTransf[1][1] = 1.01;
+      matTransf[2][2] = 1.01;
+    }
+}
+
+void translateX(int key, float x) {
+  printf("translateX\n");
+  printf("key: %d\n", key);
+  printf("x: %f\n", x);
+
+  if (key == GLUT_KEY_LEFT)
+    matTransf[3][0] = -x;
+  else
+    if (key == GLUT_KEY_RIGHT)
+      matTransf[3][0] = x;
+}
+
+void translateY(int key, float y) {
+  if (key == GLUT_KEY_UP)
+    matTransf[3][1] = y;
+  else
+    if (key == GLUT_KEY_DOWN)
+      matTransf[3][1] = -y;
+}
+
+void translateZ(int key) {
+  if (key == GLUT_KEY_LEFT || key == GLUT_KEY_DOWN) {
+    matTransf[0][0] = 0.99;
+    matTransf[1][1] = 0.99;
+    matTransf[2][2] = 0.99;
+  }
+  else
+    if (key == GLUT_KEY_RIGHT || key == GLUT_KEY_UP) {
+      matTransf[0][0] = 1.01;
+      matTransf[1][1] = 1.01;
+      matTransf[2][2] = 1.01;
+    }
+}
+
+void rotateX(int key) {
+  if (key == GLUT_KEY_LEFT)
+  {
+    matTransf[1][1] = cos(-0.01);
+    matTransf[1][2] = sin(-0.01);
+    matTransf[2][1] = -sin(-0.01);
+    matTransf[2][2] = cos(-0.01);
+  }
+  else
+    if (key == GLUT_KEY_RIGHT)
+    {
+      matTransf[1][1] = cos(0.01);
+      matTransf[1][2] = sin(0.01);
+      matTransf[2][1] = -sin(0.01);
+      matTransf[2][2] = cos(0.01);
+    }
+}
+
+void rotateY(int key) {
+  if (key == GLUT_KEY_UP)
+  {
+    matTransf[0][0] = cos(-0.01);
+    matTransf[0][2] = sin(-0.01);
+    matTransf[2][0] = -sin(-0.01);
+    matTransf[2][2] = cos(-0.01);
+  }
+  else
+    if (key == GLUT_KEY_DOWN)
+    {
+      matTransf[0][0] = cos(0.01);
+      matTransf[0][2] = sin(0.01);
+      matTransf[2][0] = -sin(0.01);
+      matTransf[2][2] = cos(0.01);
+    }
+}
+
+void rotateZ(int key) {
+  if (key == GLUT_KEY_LEFT)
+  {
+    matTransf[0][0] = cos(-0.01);
+    matTransf[0][1] = sin(-0.01);
+    matTransf[1][0] = -sin(-0.01);
+    matTransf[1][1] = cos(-0.01);
+  }
+  else
+    if (key == GLUT_KEY_RIGHT)
+    {
+      matTransf[0][0] = cos(0.01);
+      matTransf[0][1] = sin(0.01);
+      matTransf[1][0] = -sin(0.01);
+      matTransf[1][1] = cos(0.01);
+    }
+}
+
+void motion(int x, int y)
+{
+  int i;
+  float dx, dy;
+  x = x - windW; y = windH - y;
+
+  dx = x - xinicial;
+  dy = y - yinicial;
+
+  int ladoX = 0, ladoY = 0;
+
+  switch (comando) {
+  case Escalar:
+    if (dy > 0) {
+      ladoY = GLUT_KEY_UP;
+    }
+    else {
+      ladoY = GLUT_KEY_DOWN;
+    }
+
+    scale(ladoY);
+    break;
+  case RotarX:
+    if (dx > 0) {
+      ladoX = GLUT_KEY_RIGHT;
+    }
+    else {
+      ladoX = GLUT_KEY_LEFT;
+    }
+
+    rotateX(ladoX);
+    break;
+  case RotarY:
+    if (dy > 0) {
+      ladoY = GLUT_KEY_UP;
+    }
+    else {
+      ladoY = GLUT_KEY_DOWN;
+    }
+
+    rotateY(ladoY);
+    break;
+  case RotarZ:
+    if (dx > 0) {
+      ladoX = GLUT_KEY_RIGHT;
+    }
+    else {
+      ladoX = GLUT_KEY_LEFT;
+    }
+
+    rotateZ(ladoX);
+    break;
+  case TransladaX:
+    if (dx > 0) {
+      ladoX = GLUT_KEY_RIGHT;
+    }
+    else {
+      ladoX = GLUT_KEY_LEFT;
+    }
+
+    translateX(ladoX, 0.1);
+    break;
+  case TransladaY:
+    if (dy > 0) {
+      ladoY = GLUT_KEY_UP;
+    }
+    else {
+      ladoY = GLUT_KEY_DOWN;
+    }
+
+    translateY(ladoY, 0.1);
+    break;
+  case TransladaZ:
+    if (dy > 0) {
+      ladoY = GLUT_KEY_UP;
+    }
+    else {
+      ladoY = GLUT_KEY_DOWN;
+    }
+
+    translateZ(ladoY);
+    break;
+  }
+
+
+  xinicial = dx;
+  yinicial = dy;
+
+  MultMatriz();
+  glutPostRedisplay();
+}
 
 void mouse(int button, int state, int x, int y)
 {
@@ -680,12 +863,17 @@ void mouse(int button, int state, int x, int y)
   {
     if (button == GLUT_LEFT_BUTTON)
     {
-      x = x - windW;
-      // x *= local_scale;
-      y = windH - y;
-      // y *= local_scale;
-      // clipingVertex
-      gIndVert = clipVertex(x, y);    // verificar e identificar um vértice selecionado
+      xinicial = x - windW;
+      yinicial = windH - y;
+    }
+  }
+
+  if (state == GLUT_UP)
+  {
+    if (button == GLUT_LEFT_BUTTON)
+    {
+      xf = x - windW;
+      yf = windH - y;
     }
   }
 
@@ -698,90 +886,26 @@ void keyboard(int key, int x, int y)
   switch (comando)
   {
   case Escalar:
-    if (key == GLUT_KEY_LEFT || key == GLUT_KEY_DOWN) {
-      matTransf[0][0] = 0.95;
-      matTransf[1][1] = 0.95;
-      matTransf[2][2] = 0.95;
-    }
-    else
-      if (key == GLUT_KEY_RIGHT || key == GLUT_KEY_UP) {
-        matTransf[0][0] = 1.05;
-        matTransf[1][1] = 1.05;
-        matTransf[2][2] = 1.05;
-      }
+    scale(key);
     break;
-
   case RotarX:
-    if (key == GLUT_KEY_LEFT)
-    {
-      matTransf[1][1] = cos(-0.01);
-      matTransf[1][2] = sin(-0.01);
-      matTransf[2][1] = -sin(-0.01);
-      matTransf[2][2] = cos(-0.01);
-    }
-    else
-      if (key == GLUT_KEY_RIGHT)
-      {
-        matTransf[1][1] = cos(0.01);
-        matTransf[1][2] = sin(0.01);
-        matTransf[2][1] = -sin(0.01);
-        matTransf[2][2] = cos(0.01);
-      }
+    rotateX(key);
     break;
   case RotarY:
-    if (key == GLUT_KEY_UP)
-    {
-      matTransf[0][0] = cos(-0.01);
-      matTransf[0][2] = sin(-0.01);
-      matTransf[2][0] = -sin(-0.01);
-      matTransf[2][2] = cos(-0.01);
-    }
-    else
-      if (key == GLUT_KEY_DOWN)
-      {
-        matTransf[0][0] = cos(0.01);
-        matTransf[0][2] = sin(0.01);
-        matTransf[2][0] = -sin(0.01);
-        matTransf[2][2] = cos(0.01);
-      }
+    rotateY(key);
     break;
   case RotarZ:
-    if (key == GLUT_KEY_LEFT)
-    {
-      matTransf[0][0] = cos(-0.01);
-      matTransf[0][1] = sin(-0.01);
-      matTransf[1][0] = -sin(-0.01);
-      matTransf[1][1] = cos(-0.01);
-    }
-    else
-      if (key == GLUT_KEY_RIGHT)
-      {
-        matTransf[0][0] = cos(0.01);
-        matTransf[0][1] = sin(0.01);
-        matTransf[1][0] = -sin(0.01);
-        matTransf[1][1] = cos(0.01);
-      }
+    rotateZ(key);
     break;
-
-
   case TransladaX:
-    if (key == GLUT_KEY_LEFT)
-      matTransf[3][0] = -0.10;
-    else
-      if (key == GLUT_KEY_RIGHT)
-        matTransf[3][0] = 0.10;
+    translateX(key, 0.1);
     break;
   case TransladaY:
-    if (key == GLUT_KEY_UP)
-      matTransf[3][1] = 0.10;
-    else
-      if (key == GLUT_KEY_DOWN)
-        matTransf[3][1] = -0.10;
+    translateY(key, 0.1);
     break;
-    //-------------------------------------------------------
-    // OBSERVACAO 4:  
-    // Considerar Tranlacao no eixo X  y  Z
-      // -----------------------------------------------------
+  case TransladaZ:
+    translateZ(key);
+    break;
   }
   MultMatriz();
   glutPostRedisplay();
@@ -897,10 +1021,7 @@ void createGLUTMenus()
   SUBmenuTransladar = glutCreateMenu(processMenuEvents);
   glutAddMenuEntry("EixoX", TransladaX);
   glutAddMenuEntry("EixoY", TransladaY);
-  // ----------------------------------------------------
-  // OBSERVACAO 7:
-  // Considerar opcao de Translacao em Y e Z
-  // ------------------------------------------------------
+  glutAddMenuEntry("EixoZ", TransladaZ);
 
   SUBmenuPintar = glutCreateMenu(processMenuEvents);
   glutAddMenuEntry("Pontos", Pontos);
@@ -938,7 +1059,7 @@ int main(int argc, char** argv)
 
   glutReshapeFunc(reshape);
   glutSpecialFunc(keyboard);
-  // glutMotionFunc(motion);
+  glutMotionFunc(motion);
   glutMouseFunc(mouse);
   glutDisplayFunc(display);
   createGLUTMenus();

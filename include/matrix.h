@@ -47,7 +47,6 @@ public:
   }
 
   void set(int row, int col, T value) {
-    //std::memcpy(&values[row][col], &value, sizeof(T));
     values[row][col] = value;
   }
 

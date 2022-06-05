@@ -40,6 +40,8 @@
 #define BSPLINE     21
 #define CATMULLROM  22
 
+#define VARIA 0.1f
+
 #define sair 0
 
 typedef float* f4d;
@@ -55,15 +57,24 @@ private:
   int _gOperation;
   int _idColor;
   Matrix<f4d>** _pControl = nullptr;
+  Matrix<f4d>** _pcPatch = nullptr;
+  Matrix<f4d>** _ptsPatch = nullptr;
+  f4d _matBase[4];
 
   int _viewType = GL_LINE_STRIP;
-
 
   void initGLUT();
   void args();
   void init();
   void createGLUTMenus();
-  int LoadPoints(char* fileName);
+  void drawSurface();
+  void freeMatrix(Matrix<f4d>** matrix);
+  void copyControlPointsPatch(int i0, int j0);
+  void getSurfacePoints();
+  void productVectorParamMatrixBase(float t, float* tt, float* vr);
+  void productVectorMatrix(float* v, f4d* vr);
+  int loadPoints(char* fileName);
+  void setBaseMatrix(int supType);
   void showControlPoints();
   void clipVertex(int x, int y);
 

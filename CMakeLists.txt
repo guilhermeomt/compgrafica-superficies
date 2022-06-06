@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.7)
 
     project(superficies)
 
-    set(CMAKE_CXX_STANDARD 11)
+    set(CMAKE_CXX_STANDARD 14)
 
     # GLUT
     find_package(GLUT REQUIRED)
@@ -27,10 +27,8 @@ cmake_minimum_required(VERSION 3.7)
 
     file(GLOB all_SRCS
         "${PROJECT_SOURCE_DIR}/include/*.h"
-        "${PROJECT_SOURCE_DIR}/include/*.hpp"
-        "${PROJECT_SOURCE_DIR}/src/*.cpp"
         "${PROJECT_SOURCE_DIR}/src/*.c"
         )
 
     add_executable(superficies ${all_SRCS})
-    target_link_libraries(superficies ${GLUT_LIBRARIES} ${OPENGL_LIBRARIES})
+    target_link_libraries(superficies -lm ${GLUT_LIBRARIES} ${OPENGL_LIBRARIES})

@@ -28,7 +28,9 @@ Trabalho 02 - Superfícies
 #define TRANSLATE_Y 9
 #define TRANSLATE_Z 10
 
-#define CONTROL_POINTS 19
+#define CONTROL_POINTS_4 17
+#define CONTROL_POINTS_5 18
+#define CONTROL_POINTS_RANDOM 19
 #define BEZIER      20
 #define BSPLINE     21
 #define CATMULLROM  22
@@ -95,6 +97,7 @@ void copyControlPointsPatch(int i0, int j0, matrix* pcPat);
 void drawSurface(void);
 int clipVertex(int x, int y);
 int loadPoints(char* arch);
+int generatePoints();
 
 // transformation.h
 void scale(int key);

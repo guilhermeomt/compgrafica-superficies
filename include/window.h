@@ -199,8 +199,12 @@ void keyboard(int key, int x, int y)
 void processMenuEvents(int option)
 {
   identity();
-  if (option == CONTROL_POINTS)
+  if (option == CONTROL_POINTS_4)
     loadPoints("ptosControleSuperficie4x4.txt");  // ptosControleArbitra4x4   ptosControleSuperficieTrab ptosControleSuperficie4x4
+  else if (option == CONTROL_POINTS_5)
+    loadPoints("ptosControleSuperficie5x5.txt");
+  else if (option == CONTROL_POINTS_RANDOM)
+    generatePoints();
   else if (option == POINTS)
     viewType = GL_POINTS;
   else if (option == LINE)
@@ -245,7 +249,7 @@ void processColorEvents(int option) {
 
 void createGLUTMenus()
 {
-  int menu, submenu, SubMenuTranslate, SubMenuRotate, SubMenuSurface, SubMenuPaint, SubMenuColors;
+  int menu, submenu, SubMenuTranslate, SubMenuRotate, SubMenuSurface, SubMenuControlPoints, SubMenuPaint, SubMenuColors;
 
   SubMenuSurface = glutCreateMenu(processMenuEvents);
   glutAddMenuEntry("Bezier", BEZIER);
@@ -274,8 +278,14 @@ void createGLUTMenus()
   glutAddMenuEntry("Amarelo", 3);
   glutAddMenuEntry("Ciano", 4);
 
+  SubMenuControlPoints = glutCreateMenu(processMenuEvents);
+  glutAddMenuEntry("Superficie 4x4", CONTROL_POINTS_4);
+  glutAddMenuEntry("Superficie 5x5", CONTROL_POINTS_5);
+  glutAddMenuEntry("Superficie 4x4 Aleatorio", CONTROL_POINTS_RANDOM);
+
+
   menu = glutCreateMenu(processMenuEvents);
-  glutAddMenuEntry("Pontos de Controle...", CONTROL_POINTS);
+  glutAddSubMenu("Pontos de Controle", SubMenuControlPoints);
   glutAddSubMenu("Superficies", SubMenuSurface);
   glutAddSubMenu("Visao do Objeto", SubMenuPaint);
   glutAddSubMenu("Cores", SubMenuColors);

@@ -310,3 +310,33 @@ int loadPoints(char* arch)
   pcPatch = allocateMatrix(4, 4);
 
 }
+
+int generatePoints()
+{
+  float px, py, pz;
+  int i, j, n, m;
+
+  if (pControl) pControl = freeMatrix(pControl);
+
+  pControl = allocateMatrix(4, 4);
+
+  for (j = 0; j < pControl->n; j++)
+  {
+    for (i = 0; i < pControl->m; i++)
+    {
+      px = -1 * rand() % 31 + rand() % 31;
+      py = -1 * rand() % 31 + rand() % 31;
+      pz = -1 * rand() % 31 + rand() % 31;
+
+      pControl->values[j][i][0] = px * local_scale;
+      pControl->values[j][i][1] = py * local_scale;
+      pControl->values[j][i][2] = pz * local_scale;
+      pControl->values[j][i][3] = 1.0f;
+    }
+  }
+
+  // espaco de matrix para um patch
+  if (pcPatch) pcPatch = freeMatrix(pcPatch);
+  pcPatch = allocateMatrix(4, 4);
+
+}

@@ -10,6 +10,7 @@ Trabalho 02 - Superfícies
 #include <stdlib.h>
 #include <stdio.h>
 #include <math.h>
+#include <time.h>
 
 #include <GL/glut.h>
 
@@ -21,6 +22,7 @@ Trabalho 02 - Superfícies
 
 int main(int argc, char** argv)
 {
+  srand(time(NULL));
   glutInit(&argc, argv);
 
   glutInitDisplayMode(GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
